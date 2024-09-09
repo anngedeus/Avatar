@@ -121,4 +121,3 @@ ready_player_me_html = """
 
 # Display the Ready Player Me iframe in the Streamlit app
 st.components.v1.html(ready_player_me_html, height=800)
-

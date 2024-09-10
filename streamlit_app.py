@@ -1,17 +1,15 @@
 import streamlit as st
+import streamlit.components.v1 as components
 
 st.title("Create Your Avatar with Ready Player Me")
 
-# HTML and JavaScript for Ready Player Me integration and displaying the avatar in Model Viewer
 ready_player_me_html = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport"
-        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>Create Avatar</title>
     <style>
         html, body, .frame {
             width: 100%;
@@ -28,7 +26,7 @@ ready_player_me_html = """
             font-size: 16px;
             padding: 12px 24px;
             color: white;
-            background-color: #4CAF50;
+            background-color: purple;
             border: none;
             border-radius: 8px;
             cursor: pointer;
@@ -44,7 +42,46 @@ ready_player_me_html = """
         }
         model-viewer {
             width: 100%;
-            height: 500px;
+            height: 1600px;
+            object-fit: cover;
+            camera-controls;
+            camera-orbit: 0deg 90deg 1.2m;  /* Closer zoom, focus on the top half */
+            field-of-view: 25deg;  /* Narrow the field of view for a zoomed-in effect */
+            min-camera-orbit: 0deg 90deg 1m;
+            max-camera-orbit: 0deg 90deg 1.5m;
+        }
+        #chatbox {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            max-width: 500px;
+            height: 150px;
+            background-color: rgba(0, 0, 0, 0.8);
+            border-radius: 10px;
+            padding: 10px;
+            color: white;
+            display: none;  /* Initially hidden */
+            flex-direction: column;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        #chatbox-header {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        #chat-history {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+        #chat-input {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            width: 90%;
+            font-size: 12px;
         }
     </style>
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
@@ -55,13 +92,23 @@ ready_player_me_html = """
 
     <iframe id="frame" class="frame" allow="camera *; microphone *; clipboard-write" hidden></iframe>
 
-    <!-- Model viewer with camera controls but no auto-rotate -->
+    <!-- Model viewer with zoomed-in camera controls -->
     <model-viewer id="avatarViewer" camera-controls></model-viewer>
+
+    <!-- Floating Chatbox (Initially hidden) -->
+    <div id="chatbox">
+        <div id="chatbox-header">Chat with Avatar</div>
+        <div id="chat-history"></div>
+        <input id="chat-input" type="text" placeholder="Type your message..." />
+    </div>
 
     <script>
         const subdomain = 'demo';  // Replace with your custom subdomain
         const frame = document.getElementById('frame');
         const viewer = document.getElementById('avatarViewer');
+        const chatInput = document.getElementById("chat-input");
+        const chatHistory = document.getElementById("chat-history");
+        const chatbox = document.getElementById("chatbox");
 
         frame.src = `https://${subdomain}.readyplayer.me/avatar?frameApi`;
 
@@ -95,6 +142,9 @@ ready_player_me_html = """
 
                 // Set the GLB model URL in the Model Viewer
                 viewer.src = json.data.url;
+
+                // Show the floating chatbox after the avatar is selected
+                chatbox.style.display = "flex";
             }
 
             // Get user ID
@@ -102,6 +152,24 @@ ready_player_me_html = """
                 console.log(`User with ID ${json.data.id} set: ${JSON.stringify(json)}`);
             }
         }
+
+        // Handle chat input and response simulation
+        chatInput.addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                let message = chatInput.value;
+                
+                // Display user message
+                chatHistory.innerHTML += `<div>Me: ${message}</div>`;
+                chatInput.value = '';
+
+                // Simulate avatar response (this is where you would add LLM integration)
+                setTimeout(() => {
+                    let avatarResponse = "Simulated avatar response";  // Replace with API call
+                    chatHistory.innerHTML += `<div>Avatar: ${avatarResponse}</div>`;
+                    chatHistory.scrollTop = chatHistory.scrollHeight;  // Auto-scroll to bottom
+                }, 500);
+            }
+        });
 
         function parse(event) {
             try {
@@ -119,5 +187,4 @@ ready_player_me_html = """
 </html>
 """
 
-# Display the Ready Player Me iframe in the Streamlit app
-st.components.v1.html(ready_player_me_html, height=800)
+components.html(ready_player_me_html, height=800)
